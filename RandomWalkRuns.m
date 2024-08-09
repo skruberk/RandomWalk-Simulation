@@ -16,8 +16,9 @@ clearvars;
 workspace;  % Make sure the workspace panel is showing.
 %copyright 2024, KS and RDM 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Get the variables to run each time from a file % import from csv a table with num_discs,target
-runfile =  "runfile.csv";
+% Get the variables to run each time from a file % import from csv a table
+% with num_discs,target and tD
+runfile =  "runfile_master1.csv";
 runfile = strrep(runfile, '"', '');
 %runfile = filelist.runfile{i} ;
 varstable = readtable(runfile, 'VariableNamingRule', 'preserve'); 
@@ -26,6 +27,7 @@ tmod = 2 %every mod step run the code
 for i = 1:size(varstable, 1)
     num_discs = varstable.num_discs(i);
     target = varstable.target(i);
+    tD=varstable.tD(i);
     % Define parameters here
     radius = 22;    % filament movement radius variable
     %num_discs = 10;  % Number of discs or binding points 
@@ -35,8 +37,9 @@ for i = 1:size(varstable, 1)
     %Repeat random walk%%%%% 
     num_runs = 1000;%how many times to run code
     %spring_target = 1 ; % 0.1 - 1.0 works 
+
     %%filehandling%%%%%%%%%%%%%%%%%
-    filename = sprintf('targetsmoves_%d_%d_%d_%d_%d.csv', num_discs, target, tsteps,num_runs,tmod);
+    filename = sprintf('targetsmoves_%d_%d_%d_%d_%d.csv', num_discs, target, tsteps,num_runs,tD);
     % Open a file for writing
     fileID = fopen(filename, 'a');   %w for write a for append
     % Check if the file is empty
@@ -143,7 +146,7 @@ for i = 1:size(varstable, 1)
             dely = 2 * (randi(2) - 1) - 1;
             ybound = y(step - 1) + dely * delta;
     
-            % Move target positions every 10th time step
+            % Move target positions every nth time step
             if mod(step, tmod) == 0
                 %target random walk step and position change
                 for k = 1:num_discs
@@ -214,7 +217,7 @@ for i = 1:size(varstable, 1)
     % Extract the steps to hit from the data and convert to array
     steps_to_hit = table2array(data(:, 3));
     
-    % Plot the histogram
+    % Plot a histogram
     histogram(steps_to_hit, 'BinWidth', 10);  %'BinWidth', 1, 'Normalization', 'probability'
     xlabel('Steps to Hit', 'FontSize', 14);
     ylabel('count', 'FontSize', 14);
@@ -228,5 +231,4 @@ end
 % Apply the new tick labels to the y-axis
 %set(gca, 'YTickLabel', yTickLabels);
 
-%could also plot the number of hits or the euclidean distance to the target over time 
 
